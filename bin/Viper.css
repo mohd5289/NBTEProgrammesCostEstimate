@@ -1,0 +1,15 @@
+.root{
+-fx-background-color: #383838;
+-fx-font-size: 11pt;
+}
+.label{
+ -fx-text-fill:#0000FF         
+}
+.button{
+-fx-background-color:linear-gradient(#dc9656,#ab4642);
+
+}
+
+vBox{
+-fx-background-color: #808080;	
+}

@@ -71,8 +71,8 @@ public class NBTEStaff  {
 
 	@Override
 	public String toString() {
-		return "NBTEStaff [name=" + name + ", willTravelByFlight()=" + willTravelByFlight() + ", getTransport()="
-				+ getTransport() + ", getHonorarium()=" + getHonorarium() + ", getTotalEstimate()=" + getTotalEstimate()
+		return "NBTEStaff [name=" + name + ", willTravelByFlight()=" + willTravelByFlight() + ", getsTransport="
+				+ getTransport() + ", getsHonorarium=" + getHonorarium() + ", getsTotalEstimate=" + getTotalEstimate()
 				+ "]";
 	}
 

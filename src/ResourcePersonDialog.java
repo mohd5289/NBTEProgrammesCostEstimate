@@ -75,13 +75,13 @@ public class ResourcePersonDialog {
 			 
 			String nameOfResourcePerson = resourcePersonName.getText();
 			String phoneNumber = phoneNumberText.getText();
-			String address = addressText.getText();
-			String nameOfProffessionalBody =  isProffessionalBody?"":proffessionalBodyNameText.getText();
+			String address = textForAddress.getText();
+			String nameOfProffessionalBody =  isProffessionalBody?proffessionalBodyNameText.getText():"";
 			String state = states.getValue();
 			 
 			 
 			 personnelList.add(new ResourcePerson(nameOfResourcePerson, phoneNumber, address,state, nameOfProffessionalBody,isProffessionalBody, typeOfVisit));
-			 main.isProffesionalBodyResourcePerson= false;
+			// main.isProffesionalBodyResourcePerson= false;
 			 subStage.close();
 		 });
 		 
@@ -99,7 +99,7 @@ public class ResourcePersonDialog {
 	}
 
 	
-	public ResourcePersonDialog(ProgrammesCostEstimates main,ObservableList<Object> personnelList, int index, ResourcePerson resourcePerson) {
+	public ResourcePersonDialog(ObservableList<Object> personnelList, int index, ResourcePerson resourcePerson) {
 String typeOfVisit = resourcePerson.getVisitationExercise();
 		
 		Stage subStage = new Stage();
@@ -158,12 +158,12 @@ String typeOfVisit = resourcePerson.getVisitationExercise();
 			 String nameOfResourcePerson = resourcePersonName.getText();
 			String phoneNumber = phoneNumberText.getText();
 			String address = textForAddress.getText();
-			String nameOfProffessionalBody =  resourcePerson.isProffessionalBody()?"":proffessionalBodyNameText.getText();
+			String nameOfProffessionalBody =  resourcePerson.isProffessionalBody()?proffessionalBodyNameText.getText():"";
 			String state = states.getValue();
 			 
 			 
 			 personnelList.add(index,new ResourcePerson(nameOfResourcePerson, phoneNumber, address,state, nameOfProffessionalBody,resourcePerson.isProffessionalBody(), typeOfVisit));
-			 main.isProffesionalBodyResourcePerson= false;
+			// main.isProffesionalBodyResourcePerson= false;
 			 subStage.close();
 		 });
 		 

@@ -1,6 +1,7 @@
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -42,9 +43,9 @@ public class DeletePersonnelDialog {
 		deleteButtonContainer.setPadding(new Insets(5, 5, 5, 5));
 		Button btnYes = new Button("Yes");
 		Button btnNo = new Button("No");
-		
+	    deleteButtonContainer.setAlignment(Pos.CENTER);	
 		deleteButtonContainer.getChildren().addAll(btnYes,btnNo);
-
+  
 	    dialogContents.getChildren().addAll(warningLabel,deleteButtonContainer);
 	
 	   btnYes.setOnAction((ActionEvent e)->{

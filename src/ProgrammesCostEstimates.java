@@ -256,7 +256,9 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 
 	private void handleButtonClick(Button addProgrammeButton, VBox newDivision, ComboBox<String> visitationType) {
 		// TODO Auto-generated method stub
-		 addProgrammeButton.setOnAction((ActionEvent f)->{
+		 
+		
+		addProgrammeButton.setOnAction((ActionEvent f)->{
 			 isProffesionalBodyResourcePerson= true;
 			 HBox addPersonnel = new HBox(5);
 			
@@ -275,9 +277,7 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 				
 		 newDivision.getChildren().addAll(addPersonnel,personnel);
 		
-		 personnel.setOnMouseClicked(event ->{
 		 
-		 });
 		 
 		 HBox crudControlsContainer = new HBox(5);
 		 crudControlsContainer.setPadding(new Insets(15, 15, 15, 15));
@@ -289,6 +289,32 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 		 editButton.setStyle("-fx-background-color: Blue; -fx-text-fill: Black;");
 		 deleteButton.setStyle("-fx-background-color: Red; -fx-text-fill: Black;");
 		 
+		 
+		 personnel.setOnMouseClicked(event ->{
+			 int selectedIndex = personnel.getSelectionModel().getSelectedIndex();
+		 Object o = personnelList.get(selectedIndex);
+			 editButton.setOnAction((ActionEvent g)->{
+				 if(o instanceof ResourcePerson) {
+					 ResourcePerson resourcePerson = (ResourcePerson)o;
+					 new ResourcePersonDialog(personnelList,selectedIndex,resourcePerson);
+				 }
+				 else if(o instanceof NBTEStaff) {
+					 NBTEStaff nbteStaff = (NBTEStaff)o;
+					 
+					 new NBTEStaffDialog(personnelList,selectedIndex,nbteStaff);
+				 }
+				 else if(o instanceof Driver) {
+					 Driver driver =(Driver)o;
+					 
+					 new DriverDialog(personnelList,selectedIndex,driver);
+				 }
+				 
+			 });
+			 deleteButton.setOnAction((ActionEvent g)->{
+				 new DeletePersonnelDialog(personnelList,selectedIndex);
+			 });
+		 
+		 });
 		 crudControlsContainer.getChildren().addAll(editButton,deleteButton);
 		 
 		 newDivision.getChildren().add(crudControlsContainer)	; 
@@ -310,7 +336,9 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 	
 	  addResourcePersonButton.setOnAction((ActionEvent e)->{
 		  
-		  new ResourcePersonDialog(this,  isProffesionalBodyResourcePerson,personnelList, visitationType);
+		  
+		  new ResourcePersonTypeDialog(this,personnelList,visitationType);
+		//  new ResourcePersonDialog(this,  isProffesionalBodyResourcePerson,personnelList, visitationType);
 		  
 		  
 		  

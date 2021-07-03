@@ -152,11 +152,21 @@ public class ProgrammesCostEstimates extends Application {
 			  //createDivision();
 			newProgramme.getChildren().addAll(createProgramButtons);	  
 			 divisionName = divisionSelection.getValue(); 
-			Label divisionLabel = new Label(divisionName);
+			
+			 HBox divisionLabelContainer = new HBox(230);
+			 BackgroundFill bf5 = new BackgroundFill(Color.WHITE, new CornerRadii(1), null);
+			 divisionLabelContainer.setBackground(new Background(bf5));
+			 Button writeToDocBtn = new Button("Write To Document");
+			 
+			 writeToDocBtn.setStyle("-fx-background-color: Blue; -fx-text-fill: Black;");
+//			 writeToDocBtn.setVisible(false);
+			 
+			 
+			 Label divisionLabel = new Label(divisionName);
 				  divisionLabel.setFont(Font.font("Times New Roman", FontWeight.BOLD,  20));
 				  divisionLabel.setAlignment(Pos.CENTER);
 				  BackgroundFill bf1 = new BackgroundFill(Color.WHITE, new CornerRadii(1), null);
-
+				  divisionLabelContainer.getChildren().addAll(divisionLabel,writeToDocBtn );
 				  
 				  VBox newDivision = new VBox(5);
 				  
@@ -169,9 +179,9 @@ public class ProgrammesCostEstimates extends Application {
 				
 					  handleButtonClick(addProgrammeButton ,newDivision,visitationType);
 					  
-				  		newDivision.getChildren().addAll(divisionLabel,newProgramme);	 
+				  		newDivision.getChildren().addAll(divisionLabelContainer,newProgramme);	 
 			  			 	
-	  			  
+	  			            
 	  		       //  programme = diplomaSelection.getValue()+" "+programmeName.getText();
 	  		  
 	  		  //  Label programmeLabel = new Label(programme);
@@ -193,11 +203,18 @@ public class ProgrammesCostEstimates extends Application {
 	  			
 	  });
 	 
+	  Button genCostEstimateBtn = new Button("Generate Cost Estimate");
 	  
-	  
+	  genCostEstimateBtn.setStyle("-fx-background-color: Green; -fx-text-fill: Black;");
+	  //genCostEstimateBtn.setStyle("-fx-text-fill: Black");
+	 
+	  genCostEstimateBtn.setOnAction((ActionEvent e)->{
+		 // genCostEstimateBtn.setDisable(false);	  
+	  });
 divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 		                                            divisionSelection,
-		                                            addDivision);
+		                                            addDivision,
+		                                            genCostEstimateBtn );
 	  
 	  
      VBox institutionPanel = new VBox();
@@ -240,6 +257,7 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 	private void handleButtonClick(Button addProgrammeButton, VBox newDivision, ComboBox<String> visitationType) {
 		// TODO Auto-generated method stub
 		 addProgrammeButton.setOnAction((ActionEvent f)->{
+			 isProffesionalBodyResourcePerson= true;
 			 HBox addPersonnel = new HBox(5);
 			
 				
@@ -248,12 +266,35 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 				
 	
 				  ListView<Object> personnel = new ListView<>();
-					personnel.setItems(personnelList);	
+					personnel.setItems(personnelList);
+					
+					
 			//personnel.getSelectionModel()
 			//.getSelectedIndex();	
 					 handlePersonnelButtonClicks(addPersonnel,personnelList,visitationType);	
 				
 		 newDivision.getChildren().addAll(addPersonnel,personnel);
+		
+		 personnel.setOnMouseClicked(event ->{
+		 
+		 });
+		 
+		 HBox crudControlsContainer = new HBox(5);
+		 crudControlsContainer.setPadding(new Insets(15, 15, 15, 15));
+		 crudControlsContainer.setAlignment(Pos.BASELINE_RIGHT);
+		 
+		 Button editButton = new Button("Edit");
+		 Button deleteButton = new Button("Delete");
+		
+		 editButton.setStyle("-fx-background-color: Blue; -fx-text-fill: Black;");
+		 deleteButton.setStyle("-fx-background-color: Red; -fx-text-fill: Black;");
+		 
+		 crudControlsContainer.getChildren().addAll(editButton,deleteButton);
+		 
+		 newDivision.getChildren().add(crudControlsContainer)	; 
+		 
+		 
+		 
 		 });	
 	}
 
@@ -271,7 +312,7 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 		  
 		  new ResourcePersonDialog(this,  isProffesionalBodyResourcePerson,personnelList, visitationType);
 		  
-		  isProffesionalBodyResourcePerson = false;
+		  
 		  
 		  
 	  });

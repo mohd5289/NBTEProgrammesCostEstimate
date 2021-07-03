@@ -56,7 +56,7 @@ public class LocationUtils {
 		
 	ArrayList<Double> originLatLng=	statesWithLatLng.get(origin);
 	ArrayList<Double> destinationLatLng=	statesWithLatLng.get(destination);
-	return distance(originLatLng.get(0),destinationLatLng.get(0),originLatLng.get(1),destinationLatLng.get(1),'K');	
+	return distance(originLatLng.get(0),originLatLng.get(1),destinationLatLng.get(0),destinationLatLng.get(1) , 'K');	
 	}
 	
 	public static double distance(double lat1, double lon1, double lat2, double lon2, char unit) {
@@ -86,5 +86,9 @@ public class LocationUtils {
 		private static double rad2deg(double rad) {
 		  return (rad * 180.0 / Math.PI);
 		}
+		
+
+		
+// driver code
 
 }

@@ -22,7 +22,7 @@ public class Driver {
 	}
 	@Override
 	public String toString() {
-		return "Driver [amount=" + amount + ", fuel=" + fuel + "]";
+		return "Driver [amount= N" + amount + ", fuel= N" + fuel + "]";
 	}
 
 }

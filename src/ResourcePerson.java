@@ -103,8 +103,8 @@ public class ResourcePerson  {
 	public String toString() {
 		return "ResourcePerson [name=" + name + ", phoneNumber=" + phoneNumber + ", stateLocation=" + stateLocation
 				+ ", isProffesionalBody=" + isProffessionalBody + ", willTravelByFlight()=" + willTravelByFlight()
-				+ ", getsTransport=" + getTransport() + ", getsHonorarium=" + getHonorarium()
-				+ ", getsTotalEstimate=" + getTotalEstimate() + "]";
+				+ ", getsTransport= N" + getTransport() + ", getsHonorarium= N" + getHonorarium()
+				+ ", getsTotalEstimate= N" + getTotalEstimate() + "]";
 	}
 
 	

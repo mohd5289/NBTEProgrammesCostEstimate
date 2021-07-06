@@ -20,9 +20,9 @@ import javafx.stage.Stage;
 public class ResourcePersonDialog {
 
 	
-	public ResourcePersonDialog(ProgrammesCostEstimates main,boolean isProffessionalBody, ObservableList<Object> personnelList, ComboBox<String> visitationType) {
+	public ResourcePersonDialog(ProgrammesCostEstimates main,boolean isProffessionalBody, ObservableList<Object> personnelList, String visit) {
 		
-		String typeOfVisit = visitationType.getValue();
+		//String typeOfVisit = visit.getValue();
 		
 		Stage subStage = new Stage();
 		
@@ -80,7 +80,7 @@ public class ResourcePersonDialog {
 			String state = states.getValue();
 			 
 			 
-			 personnelList.add(new ResourcePerson(nameOfResourcePerson, phoneNumber, address,state, nameOfProffessionalBody,isProffessionalBody, typeOfVisit));
+			 personnelList.add(new ResourcePerson(nameOfResourcePerson, phoneNumber, address,state, nameOfProffessionalBody,isProffessionalBody, visit));
 			// main.isProffesionalBodyResourcePerson= false;
 			 subStage.close();
 		 });

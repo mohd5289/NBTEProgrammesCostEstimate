@@ -20,11 +20,11 @@ import javafx.stage.Stage;
 
 public class NBTEStaffDialog {
 
-	public NBTEStaffDialog(ProgrammesCostEstimates main, ObservableList<Object> personnelList, ComboBox<String> visitationType) {
+	public NBTEStaffDialog(ProgrammesCostEstimates main, ObservableList<Object> personnelList, String visit) {
 		
 		// TODO Auto-generated constructor stub
 	
-String typeOfVisit = visitationType.getValue();
+//String typeOfVisit = visit.getValue();
 		
 		Stage subStage = new Stage();
 		
@@ -61,7 +61,7 @@ String typeOfVisit = visitationType.getValue();
 			 String officerName = nameOfOfficer.getText();
 			boolean isSeniorStaff = ranks.getValue()== "Senior Staff"?true:false;
 			 
-			personnelList.add(new NBTEStaff(officerName,isSeniorStaff,typeOfVisit));
+			personnelList.add(new NBTEStaff(officerName,isSeniorStaff,visit));
 			 subStage.close();
 		 });
 		 

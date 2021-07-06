@@ -1,7 +1,17 @@
 import java.util.ArrayList;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -35,7 +45,7 @@ public class ProgrammesCostEstimates extends Application {
 	String resourcePersonPhoneNumber="";
 	String resourcePersonStateOfLocation="";
 	String resourcePersonAddress="";
-	boolean isProffesionalBodyResourcePerson = true;
+	//boolean isProffesionalBodyResourcePerson = true;
 	boolean isSeniorStaff = true;
 	String nameOfProffessionalBody= "";
 	String programme;
@@ -43,7 +53,10 @@ public class ProgrammesCostEstimates extends Application {
 	 String nameOfOfficer="";
 	 String driverAmount="";
 	 String fuelAmount;
+	 XWPFDocument doc = new XWPFDocument();
+	 String costEstimatesFileName= System.getProperty("user.home") + "/Desktop";
 	 ArrayList<String> addedDivisions= new ArrayList<String>();
+	 boolean waitingForCostEstimateFileToBeCreated = true;
 	
 	 public static String institutionLocation; 
 	 
@@ -64,13 +77,13 @@ public class ProgrammesCostEstimates extends Application {
 		VBox background = new VBox(10);
 	
 	Label nameOfInstitution =  new Label("Institution Name:");
-   TextField institutionField = new TextField("e.g Kaduna Polytechnic ,Kaduna");	
+   TextField institutionField = new TextField("Kaduna Polytechnic");	
 	//nameOfInstitution.setAlignment(Pos.CENTER);
      HBox institution = new HBox(9);
 	institution.getChildren().addAll(nameOfInstitution,institutionField);
 	institution.setPadding(new Insets(5, 5, 5, 5));
 	
-	 
+	
 	
 	
 	HBox selectLocation = new HBox(5);
@@ -101,7 +114,7 @@ public class ProgrammesCostEstimates extends Application {
 	  Button addDivision = new Button("Add Division");
 	//Handle Add division button
 	 
-
+	  
 	  
 	  //newDivision.set
 	  //newDivision.getChildren().addAll(programmeLabel,);
@@ -160,7 +173,53 @@ public class ProgrammesCostEstimates extends Application {
 			 
 			 writeToDocBtn.setStyle("-fx-background-color: Blue; -fx-text-fill: Black;");
 //			 writeToDocBtn.setVisible(false);
+	
+			 if (waitingForCostEstimateFileToBeCreated) {
+				// Random rand = new Random();
+				
+				   
+				    Date date = new Date(); 
+				    long l = date.getTime();
+				 costEstimatesFileName+= "/Cost Estimate for "+institutionField.getText()+" "+l+".docx";
+				 XWPFParagraph title = doc.createParagraph();
+				  
+				 title.setAlignment(ParagraphAlignment.CENTER);
+				  
+				  XWPFRun titleRun = title.createRun();
+					String docTitleText = "COST ESTIMATE FOR THE VISIT TO "+institutionField.getText()+","+institutionLocation+" STATE";
+				  titleRun.setText(docTitleText);
+				  titleRun.setBold(true);
+				  titleRun.setFontFamily("Times New Roman");
+				  
+				  titleRun.setFontSize(11);
+				  XWPFTable table = doc.createTable();
+				  
+				  createTableHeaders(table);
+				  
+					FileOutputStream out;
+					try {
+						out = new FileOutputStream(new File(costEstimatesFileName));
+						doc.write(out);
+						out.close();
+						System.out.print(costEstimatesFileName+" successfully created");
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+		
+					// TODO Auto-generated catch block
+					//e1.printStackTrace();
+				
+				  
+				  waitingForCostEstimateFileToBeCreated= false;
+			 }
 			 
+			 
+			 writeToDocBtn.setOnAction((ActionEvent f)->{
+				    
+			  //institutionField
+			 
+			 });
 			 
 			 Label divisionLabel = new Label(divisionName);
 				  divisionLabel.setFont(Font.font("Times New Roman", FontWeight.BOLD,  20));
@@ -252,28 +311,55 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 	
 	}
 
+     private void  writeRemainingTableHeaders(XWPFTableRow tableRow, ArrayList<String> headers){
+    	 
+    	 for(int i =0;i< headers.size();i++) {
+    		 
+    		 tableRow.addNewTableCell().setText(headers.get(i));
+   		  tableRow.getCell(i+1).getParagraphs().get(0).getRuns().get(0).setBold(true);
+    	 }
+    	 
+     }
+
+	private void createTableHeaders(XWPFTable table) {
+		// TODO Auto-generated method stub
+		 XWPFTableRow tableRowOne = table.getRow(0);
+		 //tableRowOne.addNewTableCell().setText();
+		 tableRowOne.getCell(0).setText("DATE");
+		  tableRowOne.getCell(0).getParagraphs().get(0).getRuns().get(0).setBold(true);
+		  
+  ArrayList<String>headers = new ArrayList<String>(Arrays.asList("INSTITUTION", "PROGRAMME", "DIVISION", "PARTICIPANTS", "TRANSPORT", "HONORARIUM","TOTAL"));
+		  
+  writeRemainingTableHeaders(tableRowOne,headers);
+	
+	
+	
+	}
+
 
 
 	private void handleButtonClick(Button addProgrammeButton, VBox newDivision, ComboBox<String> visitationType) {
 		// TODO Auto-generated method stub
-		 
+		
 		
 		addProgrammeButton.setOnAction((ActionEvent f)->{
-			 isProffesionalBodyResourcePerson= true;
-			 HBox addPersonnel = new HBox(5);
+			// isProffesionalBodyResourcePerson= true;
+		 String visit = visitationType.getValue();	
+			HBox addPersonnel = new HBox(5);
 			
 				
 				
 				ObservableList<Object> personnelList = FXCollections.observableArrayList();
 				
 	
-				  ListView<Object> personnel = new ListView<>();
-					personnel.setItems(personnelList);
-					
+				ListView<Object> personnel = new ListView<>();
+				personnel.setItems(personnelList);
+				personnel.setMinHeight(320);
+							
 					
 			//personnel.getSelectionModel()
 			//.getSelectedIndex();	
-					 handlePersonnelButtonClicks(addPersonnel,personnelList,visitationType);	
+					 handlePersonnelButtonClicks(addPersonnel,personnelList,visit);	
 				
 		 newDivision.getChildren().addAll(addPersonnel,personnel);
 		
@@ -326,7 +412,7 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 
 
 
-	private void handlePersonnelButtonClicks(HBox addPersonnel, ObservableList<Object> personnelList, ComboBox<String> visitationType) {
+	private void handlePersonnelButtonClicks(HBox addPersonnel, ObservableList<Object> personnelList, String visit) {
 		// TODO Auto-generated method stub
 		
 	   Button addResourcePersonButton = new Button("Add Resource Person");
@@ -337,7 +423,7 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 	  addResourcePersonButton.setOnAction((ActionEvent e)->{
 		  
 		  
-		  new ResourcePersonTypeDialog(this,personnelList,visitationType);
+		  new ResourcePersonTypeDialog(this,personnelList,visit);
 		//  new ResourcePersonDialog(this,  isProffesionalBodyResourcePerson,personnelList, visitationType);
 		  
 		  
@@ -345,7 +431,7 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 		  
 	  });
 	  
-	  addOfficerButton.setOnAction((ActionEvent e)->{new NBTEStaffDialog(this,personnelList,visitationType);});
+	  addOfficerButton.setOnAction((ActionEvent e)->{new NBTEStaffDialog(this,personnelList,visit);});
 	  
 	  addDriverButton.setOnAction((ActionEvent e)->{ new DriverDialog(this, personnelList);});
 	  

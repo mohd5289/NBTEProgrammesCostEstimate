@@ -20,7 +20,7 @@ public class ResourcePersonTypeDialog {
 
 	
 	
-	public ResourcePersonTypeDialog(ProgrammesCostEstimates main, ObservableList<Object> personnelList, ComboBox<String> visitationType) {
+	public ResourcePersonTypeDialog(ProgrammesCostEstimates main, ObservableList<Object> personnelList, String visit) {
 		
 		Stage subStage = new Stage();
 		
@@ -48,13 +48,13 @@ public class ResourcePersonTypeDialog {
 		 pane.add(new Label("Select Resource Person Type:"), 0, 0);
 		 pane.add(ranks, 1, 0);
 		
-		 Button btOk = new Button("Ok");
+		 Button btOk = new Button("OK");
 		
 		 btOk.setOnAction((ActionEvent e) ->{
 			 String rank = ranks.getValue();
 			 
 			
-			 new ResourcePersonDialog(main,(rank=="Proffessional Body")?true:false, personnelList, visitationType);
+			 new ResourcePersonDialog(main,(rank=="Proffessional Body")?true:false, personnelList, visit);
 			 subStage.close();
 		 });
 		 

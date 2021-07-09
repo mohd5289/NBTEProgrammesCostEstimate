@@ -6,15 +6,25 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.apache.poi.ss.usermodel.Table;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.apache.xmlbeans.XmlException;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRow;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTVMerge;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
 
 import javafx.application.Application;
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -41,25 +51,26 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 public class ProgrammesCostEstimates extends Application {
 	 
-	String resourcePersonName= "";
-	String resourcePersonPhoneNumber="";
-	String resourcePersonStateOfLocation="";
-	String resourcePersonAddress="";
+	
 	//boolean isProffesionalBodyResourcePerson = true;
-	boolean isSeniorStaff = true;
-	String nameOfProffessionalBody= "";
-	String programme;
+	
 	 String divisionName;
-	 String nameOfOfficer="";
-	 String driverAmount="";
-	 String fuelAmount;
+	 
 	 XWPFDocument doc = new XWPFDocument();
+	 
 	 String costEstimatesFileName= System.getProperty("user.home") + "/Desktop";
 	 ArrayList<String> addedDivisions= new ArrayList<String>();
 	 boolean waitingForCostEstimateFileToBeCreated = true;
-	
+	static boolean genCostEstimateBtnClicked= false;
+	 boolean firstDivisionClicked= false;
+	public static int grandTotalEstimate=0;
+	ObservableList<Object> divisionAggregatedPersonnelList = FXCollections.observableArrayList();
 	 public static String institutionLocation; 
-	 
+	 Button genCostEstimateBtn = new Button("Generate Cost Estimate");
+	 //public SimpleIntegerProperty grandTotalEstimateListener = new SimpleIntegerProperty();	
+	 public SimpleIntegerProperty binder = new SimpleIntegerProperty();
+	//public static boolean genCostEstimateEnabled = false;
+	
 	 
 	 public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -69,10 +80,10 @@ public class ProgrammesCostEstimates extends Application {
 	
 
 	@Override
-	public void start(Stage primaryStage) throws Exception {
+	public void start(Stage primaryStage) throws FileNotFoundException  {
 		// TODO Auto-generated method stub
 	
-		
+		genCostEstimateBtn.setVisible(false);
 		
 		VBox background = new VBox(10);
 	
@@ -98,7 +109,7 @@ public class ProgrammesCostEstimates extends Application {
 	  cbo.setValue("Kaduna");
 	  ObservableList<String> items =FXCollections.observableArrayList(new ArrayList<String>(LocationUtils.statesWithLatLng.keySet()));
 	  cbo.getItems().addAll(items);
-	  institutionLocation= cbo.getValue();
+	  
 	 
 	  HBox divisionSelectionPanel = new HBox(5);
 	   divisionSelectionPanel.setPadding(new Insets(5, 5, 5, 5));  
@@ -121,17 +132,22 @@ public class ProgrammesCostEstimates extends Application {
 	  
 	 
 	//  Button addProgrammeButton = new  Button("Add Programme");
-		  
-		 
-		 
-		addDivision.setOnAction((ActionEvent e)->{
+	  	 
+	  
+	   
+	  addDivision.setOnAction((ActionEvent e)->{
 	  			  //createDivisionLabel();
-			
+		  institutionLocation= cbo.getValue();
+		
 			 Button addProgrammeButton = new  Button("Add Programme");
 		
-			
-			 
-			 
+			// ObservableList<?> divisionPersonel = new ObservableList<?>() ;
+			 final AggregatedObservableArrayList<Object> aggregatedWrapper = new AggregatedObservableArrayList<>();
+			  divisionAggregatedPersonnelList = aggregatedWrapper.getAggregatedList(); 
+		      
+		        ObservableList<SimpleIntegerProperty> divisionSizes = FXCollections.observableArrayList();
+		        ObservableList<ArrayList<String>>diplomasAndProgrammes= FXCollections.observableArrayList();
+		        		//new ArrayList<ArrayList<String>>();
 			 HBox createProgramButtons = new HBox(3);	  
 			  ComboBox<String> diplomaSelection = new ComboBox<>();
 			  		  diplomaSelection.setPrefWidth(100);
@@ -147,7 +163,7 @@ public class ProgrammesCostEstimates extends Application {
 		  		            Arrays.asList("Resource Inspection", "Accreditation", "Verification")));
 			  		visitationType.getItems().addAll(visitations);  
 			  		
-			  		  TextField programmeName =  new TextField("e.g Public Admin"); 
+			  		  TextField programmeName =  new TextField("Public Admin"); 
 			  		  
 			  createProgramButtons.getChildren().addAll(new Label("Programme:"),
 					                                         diplomaSelection,
@@ -169,63 +185,114 @@ public class ProgrammesCostEstimates extends Application {
 			 HBox divisionLabelContainer = new HBox(230);
 			 BackgroundFill bf5 = new BackgroundFill(Color.WHITE, new CornerRadii(1), null);
 			 divisionLabelContainer.setBackground(new Background(bf5));
-			 Button writeToDocBtn = new Button("Write To Document");
+			 Button submitToDocBtn = new Button("Submit To Document");
 			 
-			 writeToDocBtn.setStyle("-fx-background-color: Blue; -fx-text-fill: Black;");
+			 submitToDocBtn.setStyle("-fx-background-color: Blue; -fx-text-fill: Black;");
 //			 writeToDocBtn.setVisible(false);
-	
-			 if (waitingForCostEstimateFileToBeCreated) {
-				// Random rand = new Random();
-				
-				   
-				    Date date = new Date(); 
-				    long l = date.getTime();
-				 costEstimatesFileName+= "/Cost Estimate for "+institutionField.getText()+" "+l+".docx";
-				 XWPFParagraph title = doc.createParagraph();
-				  
-				 title.setAlignment(ParagraphAlignment.CENTER);
-				  
-				  XWPFRun titleRun = title.createRun();
-					String docTitleText = "COST ESTIMATE FOR THE VISIT TO "+institutionField.getText()+","+institutionLocation+" STATE";
-				  titleRun.setText(docTitleText);
-				  titleRun.setBold(true);
-				  titleRun.setFontFamily("Times New Roman");
-				  
-				  titleRun.setFontSize(11);
-				  XWPFTable table = doc.createTable();
-				  
-				  createTableHeaders(table);
-				  
-					FileOutputStream out;
-					try {
-						out = new FileOutputStream(new File(costEstimatesFileName));
-						doc.write(out);
-						out.close();
-						System.out.print(costEstimatesFileName+" successfully created");
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-		
-					// TODO Auto-generated catch block
-					//e1.printStackTrace();
-				
-				  
-				  waitingForCostEstimateFileToBeCreated= false;
-			 }
+			boolean enableSubmitButton = false;
+			  if (waitingForCostEstimateFileToBeCreated) {
+					// Random rand = new Random();
+					
+					    Date date = new Date(); 
+					    long l = date.getTime();
+					 costEstimatesFileName+= "/Cost Estimate for "+institutionField.getText()+" "+l+".docx";
+					  String institutionTableName=institutionField.getText()+","+institutionLocation+" State";
+					 
+						String docTitleText = "COST ESTIMATE FOR THE VISIT TO "+institutionField.getText()+","+institutionLocation+" STATE";
+						  XWPFParagraph title = doc.createParagraph();
+						  XWPFRun titleRun = title.createRun();
+						  title.setAlignment(ParagraphAlignment.CENTER);
+						
+						 titleRun.setText(docTitleText);
+					  titleRun.setBold(true);
+					  titleRun.setFontFamily("Times New Roman");
+					  
+					  titleRun.setFontSize(11);
+					 
+						
+						 XWPFTable table= doc.createTable(); 
+						 
+						 ArrayList<String>headers = new ArrayList<String>(Arrays.asList("DATE","INSTITUTION", "PROGRAMME", "DIVISION", "PARTICIPANTS", "TRANSPORT", "HONORARIUM","TOTAL"));
+						 XWPFTableRow headingRow = table.getRow(0);
+						// XWPFTableRow normalRow = table.getRow(0);
+						 addRemainingTableCells(headingRow,headers);
+						XWPFTableRow tableRowTwo=table.createRow();
+						
+						tableRowTwo.getCell(0).setText("col one, row two");
+					      tableRowTwo.getCell(1).setText("col two, row two");
+					      tableRowTwo.getCell(2).setText("col three, row two");
+					      tableRowTwo.getCell(3).setText("col one, row two");
+					      tableRowTwo.getCell(4).setText("col two, row two");
+					      tableRowTwo.getCell(5).setText("col three, row two");
+					      tableRowTwo.getCell(6).setText("col one, row two");
+					      tableRowTwo.getCell(7).setText("col two, row two");
+//					    
+					 	  
+					  waitingForCostEstimateFileToBeCreated= false;
+				 }	 
+			
 			 
-			 
-			 writeToDocBtn.setOnAction((ActionEvent f)->{
-				    
+			 submitToDocBtn.setVisible(false);
+			 submitToDocBtn.setOnAction((ActionEvent f)->{
+					int divisionTotalEstimate = 0;
+				 XWPFTable table = doc.getTableArray(0);
+				 
+				
+				XWPFTableRow tableRowOne = table.getRow(1);
+				
+				//new XWPFDocument()
+				
+				 CTVMerge vmerge = CTVMerge.Factory.newInstance();
+				 vmerge.setVal(STMerge.RESTART);
+				 for(int i = 0,k =0;i<  divisionSizes.size(); i++) {
+					 
+					 if(i==0) {
+						
+						 if(firstDivisionClicked== false) {
+							 setMergeContinue(0,tableRowOne);
+							setMergeContinue(1,tableRowOne); 		
+						 }else {
+						
+					setBlankCell(0,tableRowOne); 
+					setMergeRestart(0,tableRowOne);
+					setMergeRestart(1,tableRowOne);
+						 writeInstitutionNameToCell( tableRowOne, institutionField);
+						 writeDivisionNameToCell(tableRowOne,divisionSelection);
+					 }
+						 setMergeRestart(3,tableRowOne);
+					 }
+					 for (int j= 0;j < divisionSizes.get(i).getValue(); j++) {
+						 ArrayList<String> programmesSpecifications= diplomasAndProgrammes.get(i); 
+						 Object o = divisionAggregatedPersonnelList.get(k);
+						        					
+						 if(j==0) {
+						 //  XWPFTableRow newTableRow=table.createRow();
+						   setBlankCell(2,tableRowOne);
+						   setMergeRestart(2,tableRowOne);
+						   writeProgrammeNameToCell(tableRowOne,programmesSpecifications.get(0),programmesSpecifications.get(1),programmesSpecifications.get(2));
+						   checkAndWritePersonnelToCells(o,tableRowOne, table,j,k,divisionTotalEstimate);
+						  }else {  
+							checkAndWritePersonnelToCells(o,setNewRow(table.createRow()), table,j,k,divisionTotalEstimate);  
+						  }
+						 k++;  
+					 
+					 
+					 }   }
+				 
 			  //institutionField
-			 
+				// grandTotalEstimate+=divisionTotalEstimate;
+				// System.out.print(divisionTotalEstimate);
+				// System.out.print(grandTotalEstimate);
+				 firstDivisionClicked= false;	 
+				 submitToDocBtn.setVisible(false);
+				 genCostEstimateBtn.setVisible(true);
 			 });
 			 
 			 Label divisionLabel = new Label(divisionName);
 				  divisionLabel.setFont(Font.font("Times New Roman", FontWeight.BOLD,  20));
 				  divisionLabel.setAlignment(Pos.CENTER);
 				  BackgroundFill bf1 = new BackgroundFill(Color.WHITE, new CornerRadii(1), null);
-				  divisionLabelContainer.getChildren().addAll(divisionLabel,writeToDocBtn );
+				  divisionLabelContainer.getChildren().addAll(divisionLabel,submitToDocBtn );
 				  
 				  VBox newDivision = new VBox(5);
 				  
@@ -236,22 +303,15 @@ public class ProgrammesCostEstimates extends Application {
 					  newDivision.setBackground(new Background(bf1));
 					  newDivision.setPadding(new Insets(5, 5, 5, 5));
 				
-					  handleButtonClick(addProgrammeButton ,newDivision,visitationType);
-					  
+					  handleButtonClick(addProgrammeButton ,newDivision,visitationType,divisionSizes,aggregatedWrapper
+							  ,diplomaSelection,programmeName,diplomasAndProgrammes,submitToDocBtn);
+					  if(diplomasAndProgrammes.size()==0) {
+						  submitToDocBtn.setVisible(false);
+					  }
 				  		newDivision.getChildren().addAll(divisionLabelContainer,newProgramme);	 
 			  			 	
 	  			            
-	  		       //  programme = diplomaSelection.getValue()+" "+programmeName.getText();
-	  		  
-	  		  //  Label programmeLabel = new Label(programme);
-	  		    //     VBox newDivision = new VBox(5);
-	  				 
-	  		//    programmeLabel.setAlignment(Pos.CENTER);
-	  			//	  BackgroundFill bf1 = new BackgroundFill(Color.WHITE, new CornerRadii(1), null);
-	  				// oneDivision.setAlignment(Pos.CENTER);
-	  				//  newDivision.setBackground(new Background(bf1));
-	  				  //newDivision.getChildren().addAll(programmeLabel,); 
-			// VBox copy = (VBox) PipedDeepCopy.copy(newDivision);
+	  		      
 			
 	  		  	if(!addedDivisions.contains(divisionSelection.getValue())) {
 	   		
@@ -262,14 +322,50 @@ public class ProgrammesCostEstimates extends Application {
 	  			
 	  });
 	 
-	  Button genCostEstimateBtn = new Button("Generate Cost Estimate");
-	  
+	 
+	  genCostEstimateBtn.setVisible(false);	
 	  genCostEstimateBtn.setStyle("-fx-background-color: Green; -fx-text-fill: Black;");
 	  //genCostEstimateBtn.setStyle("-fx-text-fill: Black");
 	 
 	  genCostEstimateBtn.setOnAction((ActionEvent e)->{
-		 // genCostEstimateBtn.setDisable(false);	  
-	  });
+		 // genCostEstimateBtn.setDisable(false);	
+		 XWPFTable table = doc.getTableArray(0);
+		 XWPFTableRow totalEstimateTableRow =  table.createRow();
+		 setNewRow(totalEstimateTableRow);
+		
+		 for(int i=0;i<4; i++ ) {
+		 setMergeRestart(i, totalEstimateTableRow);
+		 }
+		 XWPFParagraph totalParagraph = new XWPFDocument().createParagraph();
+		 XWPFRun runTotalParagraph =  totalParagraph.createRun();
+		 
+		 runTotalParagraph.setBold(true);
+		 runTotalParagraph.setText("TOTAL");
+		 totalEstimateTableRow.getCell(1).setParagraph(totalParagraph);
+		 
+		 XWPFParagraph totalEstimateParagraph = new XWPFDocument().createParagraph();
+		 XWPFRun runTotalEstimateParagraph =  totalEstimateParagraph.createRun();
+		 
+		 runTotalEstimateParagraph.setBold(true);
+		 runTotalEstimateParagraph.setText(String.valueOf(grandTotalEstimate));
+		 totalEstimateTableRow.getCell(7).setParagraph(totalEstimateParagraph);
+		 
+		 System.out.println(grandTotalEstimate);
+		  
+		  
+		  FileOutputStream out;
+		  try {
+				out = new FileOutputStream(new File(costEstimatesFileName));	
+				doc.write(out);
+				out.close();
+				System.out.print(costEstimatesFileName+" successfully created");
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}			
+		  genCostEstimateBtnClicked= true;	 
+	  }); 
+		 
 divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 		                                            divisionSelection,
 		                                            addDivision,
@@ -311,12 +407,55 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 	
 	}
 
-     private void  writeRemainingTableHeaders(XWPFTableRow tableRow, ArrayList<String> headers){
+     private void setBlankCell(int i, XWPFTableRow tableRowOne) {
+		// TODO Auto-generated method stub
+	XWPFParagraph paragraph = new XWPFDocument().createParagraph();
+    	 paragraph.createRun().setText("",0);
+    	 tableRowOne.getCell(i).setParagraph(paragraph);
+	
+	}
+
+
+
+	private void writeDivisionNameToCell(XWPFTableRow tableRowOne, ComboBox<String> divisionSelection) {
+		// TODO Auto-generated method stub
+    	// tableRowOne.getCell(3).addParagraph();
+		XWPFParagraph paragraph= new XWPFDocument().createParagraph();
+    	 XWPFRun run = paragraph.createRun();
+    	 run.setBold(true);
+    	 run.setText(divisionSelection.getValue());
+    	 tableRowOne.getCell(3).setParagraph(paragraph);
+	}
+
+
+
+	private void writeProgrammeNameToCell(XWPFTableRow tableRowOne, String diploma, String programme,
+			String visit) {
+		// TODO Auto-generated method stub
+    	// XWPFParagraph paragraph= tableRowOne.getCell(2).addParagraph();
+		XWPFParagraph paragraph= new XWPFDocument().createParagraph();
+    	 
+		XWPFRun run  = paragraph.createRun();
+		
+		XWPFRun visitRun  = paragraph.createRun();      
+		run.setText(diploma);
+	          run.addBreak();
+	          run.setText(programme);
+	          run.addBreak();
+	          visitRun.setBold(true);
+	          visitRun.setText("("+visit+")");
+	          tableRowOne.getCell(2).setParagraph(paragraph);
+     }
+
+
+
+	private void  writeRemainingTableHeaders(XWPFTableRow tableRow, ArrayList<String> headers){
     	 
     	 for(int i =0;i< headers.size();i++) {
     		 
-    		 tableRow.addNewTableCell().setText(headers.get(i));
-   		  tableRow.getCell(i+1).getParagraphs().get(0).getRuns().get(0).setBold(true);
+    		 tableRow.getCell(i+1).setText(headers.get(i));
+    		// tableRow.addNewTableCell().setText(headers.get(i));
+    		// tableRow.getCell(i+1).getParagraphs().get(0).getRuns().get(0).setBold(true);
     	 }
     	 
      }
@@ -325,12 +464,13 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 		// TODO Auto-generated method stub
 		 XWPFTableRow tableRowOne = table.getRow(0);
 		 //tableRowOne.addNewTableCell().setText();
-		 tableRowOne.getCell(0).setText("DATE");
-		  tableRowOne.getCell(0).getParagraphs().get(0).getRuns().get(0).setBold(true);
+		
 		  
-  ArrayList<String>headers = new ArrayList<String>(Arrays.asList("INSTITUTION", "PROGRAMME", "DIVISION", "PARTICIPANTS", "TRANSPORT", "HONORARIUM","TOTAL"));
+		 
 		  
-  writeRemainingTableHeaders(tableRowOne,headers);
+  
+		  
+ // writeRemainingTableHeaders(tableRowOne,headers);
 	
 	
 	
@@ -338,28 +478,81 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 
 
 
-	private void handleButtonClick(Button addProgrammeButton, VBox newDivision, ComboBox<String> visitationType) {
+	@SuppressWarnings("rawtypes")
+	private void handleButtonClick(Button addProgrammeButton, VBox newDivision, ComboBox<String> visitationType, ObservableList<SimpleIntegerProperty> divisionSizes, AggregatedObservableArrayList<Object> aggregatedWrapper, ComboBox<String> diplomaSelection, TextField programmeName,
+			ObservableList<ArrayList<String>> diplomasAndProgrammes, Button submitToDocBtn ) {
 		// TODO Auto-generated method stub
 		
 		
 		addProgrammeButton.setOnAction((ActionEvent f)->{
 			// isProffesionalBodyResourcePerson= true;
-		 String visit = visitationType.getValue();	
+			
+			
+			String diploma = diplomaSelection.getValue();
+			
+			String programme = programmeName.getText();
+			//String diplomaAndProgramme= diploma+" "+programme;
+			String visit = visitationType.getValue();
+		ArrayList<String> programmesListSpecification = new ArrayList<String>(Arrays.asList(diploma, programme,visit));
+			
+			diplomasAndProgrammes.add(programmesListSpecification);
+				
 			HBox addPersonnel = new HBox(5);
 			
 				
 				
 				ObservableList<Object> personnelList = FXCollections.observableArrayList();
-				
+				//divisionSizes.add(personnelList.size());
 	
 				ListView<Object> personnel = new ListView<>();
 				personnel.setItems(personnelList);
 				personnel.setMinHeight(320);
-							
-					
+				aggregatedWrapper.appendList(personnelList);
+				
+				//SimpleIntegerProperty listSizeBinder= new SimpleIntegerProperty(1);
+				
+			
+			
+			//int  index= divisionSizes.indexOf(listSize);
+			//System.out.print(divisionSizes.get(0));
+			
+				  
+				  
+				  personnelList.addListener(new ListChangeListener() {
+					    
+
+						@Override
+						public void onChanged(Change c) {
+							 SimpleIntegerProperty listSize= new SimpleIntegerProperty(personnelList.size());
+							binder.bind(listSize);
+							// TODO Auto-generated method stub
+					  
+					  }
+					});
+				 
+				  divisionSizes.add(binder);
+				  int indexOfBinder= divisionSizes.indexOf(binder);
+				   ArrayList<String> diplomaAndProgramme= diplomasAndProgrammes.get(indexOfBinder);
+				  binder.addListener((ObservableValue<? extends Number> obs, Number oldValue, Number newValue) -> {
+					   // System.out.print("Calm down");
+						
+						if(newValue.intValue()==0) {
+							diplomasAndProgrammes.remove(diplomaAndProgramme);
+					    	divisionSizes.remove(binder);
+					    }if(divisionSizes.size()==0){
+					    	submitToDocBtn.setVisible(false);
+					    }
+					   else if(!divisionSizes.contains(binder) &&newValue.intValue()==1){
+					    	divisionSizes.add(binder);
+					    	diplomasAndProgrammes.add(diplomaAndProgramme);
+					   }
+						
+					    
+					    }); 		  
+				  
 			//personnel.getSelectionModel()
-			//.getSelectedIndex();	
-					 handlePersonnelButtonClicks(addPersonnel,personnelList,visit);	
+			//.getSelectedIndex(); 	
+					 handlePersonnelButtonClicks(addPersonnel,personnelList,visit,submitToDocBtn,divisionSizes);	
 				
 		 newDivision.getChildren().addAll(addPersonnel,personnel);
 		
@@ -401,20 +594,30 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 			 });
 		 
 		 });
+		 
+			//System.out.print(divisionSizes.get(0));
+		 
 		 crudControlsContainer.getChildren().addAll(editButton,deleteButton);
 		 
 		 newDivision.getChildren().add(crudControlsContainer)	; 
-		 
-		 
-		 
-		 });	
+		
+		// if(personnelList.isEmpty()) {
+			// submitToDocBtn.setVisible(false);
+		//	 personnelList.remove(index);
+		//	 diplomasAndProgrammes.remove(index);
+			 
+		 //}
+		
+	
+		});	
+	
 	}
 
 
 
-	private void handlePersonnelButtonClicks(HBox addPersonnel, ObservableList<Object> personnelList, String visit) {
+	private void handlePersonnelButtonClicks(HBox addPersonnel, ObservableList<Object> personnelList, String visit, Button submitToDocBtn, ObservableList<SimpleIntegerProperty> divisionSizes) {
 		// TODO Auto-generated method stub
-		
+	  int count = 0;	
 	   Button addResourcePersonButton = new Button("Add Resource Person");
 		
 	   Button addOfficerButton = new Button("Add Officer"); 
@@ -423,26 +626,305 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 	  addResourcePersonButton.setOnAction((ActionEvent e)->{
 		  
 		  
-		  new ResourcePersonTypeDialog(this,personnelList,visit);
+		  new ResourcePersonTypeDialog(this,personnelList,visit,submitToDocBtn,divisionSizes);
 		//  new ResourcePersonDialog(this,  isProffesionalBodyResourcePerson,personnelList, visitationType);
-		  
+		 // counter(count);
 		  
 		  
 		  
 	  });
 	  
-	  addOfficerButton.setOnAction((ActionEvent e)->{new NBTEStaffDialog(this,personnelList,visit);});
+	  addOfficerButton.setOnAction((ActionEvent e)->{new NBTEStaffDialog(this,personnelList,visit,submitToDocBtn,divisionSizes);});
 	  
-	  addDriverButton.setOnAction((ActionEvent e)->{ new DriverDialog(this, personnelList);});
+	  addDriverButton.setOnAction((ActionEvent e)->{ new DriverDialog(this, personnelList,submitToDocBtn,divisionSizes);});
+	  
 	  
 	  addPersonnel.getChildren().addAll(addResourcePersonButton
                 ,addOfficerButton,
                 addDriverButton);
 	
+		
+	}
+	
+	private void writeDriverToCell(XWPFTable table,XWPFTableRow tableRow, Driver driver, int j,int k) {
+		mergeEmptyCells(tableRow,j,k, new XWPFDocument().createParagraph());
+		
+		//XWPFParagraph paragraphDriver=tableRow.getCell(7).addParagraph();
+		XWPFParagraph paragraphDriver= new XWPFDocument().createParagraph();
+		XWPFRun runDriver=	paragraphDriver.createRun();
+		runDriver.setText("Driver");
+		tableRow.getCell(4).setParagraph(paragraphDriver);
+		//tableRow.getCell(7).setParagraph(driver.getAmount());
+		
+		//XWPFParagraph paragraphDriverAmount=tableRow.getCell(4).addParagraph();
+		XWPFParagraph paragraphDriverAmount=new XWPFDocument().createParagraph();
+		XWPFRun runDriverAmount=	 paragraphDriverAmount.createRun();
+		runDriverAmount.setText(driver.getAmount());
+		tableRow.getCell(7).setParagraph(paragraphDriverAmount);
+		runDriverAmount.setText(driver.getAmount());
+		
+		XWPFTableRow tableRow1 =setNewRow(table.createRow());
+		
+		setBlankCell( 0, tableRow1);
+		setMergeContinue(0,tableRow1);
+		
+		setBlankCell( 1, tableRow1);
+		setMergeContinue(1,tableRow1);
+		
+		setBlankCell(2, tableRow1);
+		setMergeContinue(2,tableRow1);
+		
+		setBlankCell( 3, tableRow1);
+		setMergeContinue(3,tableRow1);
+		
+		//XWPFParagraph paragraphFuel = tableRow1.getCell(4).addParagraph();
+		//XWPFParagraph paragraphFuelAmount =  tableRow1.getCell(7).addParagraph();
+		XWPFParagraph paragraphFuel = new XWPFDocument().createParagraph();
+		XWPFParagraph paragraphFuelAmount =new XWPFDocument().createParagraph();
+		
+		
+		
+		 XWPFRun runFuel = paragraphFuel.createRun();
+		runFuel.setText("Fuel");
+		 tableRow1.getCell(4).setParagraph(paragraphFuel);
+		 
+		XWPFRun runFuelAmount = paragraphFuelAmount.createRun();
+		runFuelAmount.setText(driver.getFuel());
+		tableRow1.getCell(7).setParagraph(paragraphFuelAmount);
+	
+	
+	
+	
 	
 	}
+	
+private void mergeEmptyCells(XWPFTableRow tableRow,int j,int k,XWPFParagraph paragraph) {
+	CTVMerge vmergeContinue = CTVMerge.Factory.newInstance();
+	vmergeContinue.setVal(STMerge.CONTINUE);
+	
+	if(j!=0) {
+		setMergeContinue(2,tableRow);
+		
+	}
+	if(k!=0) {
+		setMergeContinue(0,tableRow);
+		setMergeContinue(1,tableRow);
+		setMergeContinue(3,tableRow);
+		
+	}
+	
+}
+	
+	
+	private void writeNBTEStaffToCell(XWPFTableRow tableRow, NBTEStaff nbteStaff, int j,int k) {
+		
+		mergeEmptyCells(tableRow,j,k, new XWPFDocument().createParagraph());
+		//XWPFParagraph paragraph=tableRow.getCell(4).addParagraph();
+		XWPFParagraph paragraph= new XWPFDocument().createParagraph();
+		
+		XWPFRun titleRun=	paragraph.createRun();
+		XWPFRun nameRun=   paragraph.createRun();
+		titleRun.setBold(true);
+		titleRun.setText("NBTE Staff");
+		titleRun.addBreak();
+		nameRun.setText(nbteStaff.getName());
+		nameRun.setBold(false);
+		tableRow.getCell(4).setParagraph(paragraph);
+	
+	
+		XWPFParagraph paragraphTransport = new XWPFDocument().createParagraph();
+		XWPFRun transportRun=	paragraphTransport.createRun();
+		transportRun.setText( String.valueOf(nbteStaff.getTransport()));
+		
+		tableRow.getCell(5).setParagraph(paragraphTransport);
+		
+		XWPFParagraph paragraphHonoriarum = new XWPFDocument().createParagraph();
+		XWPFRun honoriarumRun=	paragraphHonoriarum.createRun();
+	     
+		honoriarumRun.setText( String.valueOf(nbteStaff.getHonorarium()));
+		tableRow.getCell(6).setParagraph(paragraphHonoriarum);
+	
+		XWPFParagraph paragraphTotalEstimate = new XWPFDocument().createParagraph();
+		XWPFRun totalEstimateRun=	paragraphTotalEstimate.createRun();
+	     
+		 totalEstimateRun.setText( String.valueOf(nbteStaff.getTotalEstimate()));
+		tableRow.getCell(7).setParagraph(paragraphTotalEstimate);
+	}
+	
+	
+	private void writeProffessionalBodyResourcePersonToCell(XWPFTableRow tableRow, ResourcePerson resourcePerson, int j,int k) {
+		mergeEmptyCells(tableRow,j,k,new XWPFDocument().createParagraph());
+		
+	//	XWPFParagraph paragraph=tableRow.getCell(4).addParagraph();
+		XWPFParagraph paragraph = new XWPFDocument().createParagraph();
+		
+		XWPFRun run=	paragraph.createRun();
+		
+		
+		run.setText(resourcePerson.getNameOfProffessionalBody());
+		run.addBreak();
+		run.setText(resourcePerson.getStateLocation());
+		run.addBreak();
+		run.setText(resourcePerson.getPhoneNumber());
+	
+		tableRow.getCell(4).setParagraph(paragraph);
+	
+		XWPFParagraph paragraphTransport = new XWPFDocument().createParagraph();
+		XWPFRun transportRun=	paragraphTransport.createRun();
+	     
+		transportRun.setText( String.valueOf(resourcePerson.getTransport()));
+		tableRow.getCell(5).setParagraph(paragraphTransport);
+	
+		XWPFParagraph paragraphHonoriarum = new XWPFDocument().createParagraph();
+		XWPFRun honoriarumRun=	paragraphHonoriarum.createRun();
+	     
+		honoriarumRun.setText( String.valueOf(resourcePerson.getHonorarium()));
+		tableRow.getCell(6).setParagraph(paragraphHonoriarum);
+	
+		XWPFParagraph paragraphTotalEstimate = new XWPFDocument().createParagraph();
+		XWPFRun totalEstimateRun=	paragraphTotalEstimate.createRun();
+	     
+		 totalEstimateRun.setText( String.valueOf(resourcePerson.getTotalEstimate()));
+		tableRow.getCell(7).setParagraph(paragraphTotalEstimate);
+	}
+	
+	private void writeResourcePersonNameToCell(XWPFTableRow tableRow, ResourcePerson resourcePerson,int j,int k) {
+		//XWPFParagraph paragraph=tableRow.getCell(4).addParagraph();
+		mergeEmptyCells(tableRow,j,k, new XWPFDocument().createParagraph());
+		XWPFParagraph paragraph= new XWPFDocument().createParagraph();
+		XWPFRun run=	paragraph.createRun();	
+		run.setText(resourcePerson.getName());
+		run.addBreak();
+		run.setText(resourcePerson.getAddress());
+		run.addBreak();
+		run.setText(resourcePerson.getPhoneNumber());
+		tableRow.getCell(4).setParagraph(paragraph);
+		
+		XWPFParagraph paragraphTransport = new XWPFDocument().createParagraph();
+		XWPFRun transportRun=	paragraphTransport.createRun();
+		transportRun.setText( String.valueOf(resourcePerson.getTransport()));
+		
+		tableRow.getCell(5).setParagraph(paragraphTransport);
+		
+		XWPFParagraph paragraphHonoriarum = new XWPFDocument().createParagraph();
+		XWPFRun honoriarumRun=	paragraphHonoriarum.createRun();
+	     
+		honoriarumRun.setText( String.valueOf(resourcePerson.getHonorarium()));
+		tableRow.getCell(6).setParagraph(paragraphHonoriarum);
+	
+		XWPFParagraph paragraphTotalEstimate = new XWPFDocument().createParagraph();
+		XWPFRun totalEstimateRun=	paragraphTotalEstimate.createRun();
+	     
+		 totalEstimateRun.setText( String.valueOf(resourcePerson.getTotalEstimate()));
+		tableRow.getCell(7).setParagraph(paragraphTotalEstimate);
+	}
+private void writeInstitutionNameToCell(XWPFTableRow tableRow, TextField institutionField) {
+//	XWPFParagraph paragraph=tableRow.getCell(1).addParagraph();
+	//((XWPFTable) table).createRow()
+	 XWPFDocument document = new XWPFDocument();
+	 XWPFParagraph paragraph =document.createParagraph();
+	XWPFRun run=	paragraph.createRun();
+				  run.setText(institutionField.getText()+",");
+				  run.addBreak();
+				  run.setText(institutionLocation);
+				  run.addBreak();
+				  run.setText("State");
+				  tableRow.getCell(1).setParagraph(paragraph);
+}
 
 
-  }
+private void checkAndWritePersonnelToCells(Object o,XWPFTableRow tableRow, XWPFTable table, int j,int k, int divisionTotalEstimate) {
+	if(o instanceof ResourcePerson) {						   
+		   ResourcePerson resourcePerson= (ResourcePerson)o;
+		   divisionTotalEstimate+= resourcePerson.getTotalEstimate();
+		   System.out.print(divisionTotalEstimate);
+		   if(resourcePerson.isProffessionalBody()) {
+		   writeProffessionalBodyResourcePersonToCell(tableRow, resourcePerson,j,k);}
+        else {writeResourcePersonNameToCell(tableRow, resourcePerson,j,k);
+              }    
+	         }
+		else if(o instanceof NBTEStaff) {
+			 NBTEStaff nbteStaff = (NBTEStaff)o;
+			writeNBTEStaffToCell(tableRow, nbteStaff,j,k);
+			divisionTotalEstimate+= nbteStaff.getTotalEstimate();
+		}
+		else if(o instanceof Driver) {
+			 Driver driver =(Driver)o;
+			 writeDriverToCell(table, tableRow, driver,j,k);
+			 divisionTotalEstimate+= driver.getTotalEstimate();
+		}
+	
+	grandTotalEstimate+=divisionTotalEstimate;
+	System.out.println(grandTotalEstimate);
+	//grandTotalEstimateListener = new SimpleIntegerProperty(grandTotalEstimate);	
+
+//	grandTotalEstimateListener.addListener((ObservableValue<? extends Number> obs, Number oldValue, Number newValue) -> {
+		   // System.out.print("Calm down");
+	//		if(newValue.intValue()==0) {
+		//		genCostEstimateBtn.setVisible(false);	
+		//    }   
+			
+		  //  });       
+
+}	
+
+private void setNormalTextInCells(XWPFTableRow tableRow ) {
+	for(int i =0 ;i< 8 ;i++) {
+		tableRow.getCell(i).getParagraphs().get(0).getRuns().get(0).setBold(false);
+	//	XWPFRun run =tableRow.getCell(i).getParagraphs().get(0).getRuns().get(0);
+		XWPFDocument d = new XWPFDocument();
+		XWPFParagraph p = d.createParagraph();
+		XWPFRun run1=	p.createRun();
+		XWPFRun run2=	p.createRun();
+		run1.setText("c");
+		run1.addBreak();
+		
+		run1.setText("a");
+		
+		
+	}
+	
+}
+
+private void addRemainingTableCells(XWPFTableRow tableRow,ArrayList<String>headers) {
+	
+	 tableRow.getCell(0).setText("DATE");
+	  tableRow.getCell(0).getParagraphs().get(0).getRuns().get(0).setBold(true);
+	for(int i =1 ;i< headers.size() ;i++) {
+		
+		tableRow.addNewTableCell().setText(headers.get(i));
+		tableRow.getCell(i).getParagraphs().get(0).getRuns().get(0).setBold(true);
+	}
+	
+	
+}
+private void setMergeRestart(int i, XWPFTableRow tableRow) {
+	CTVMerge vmerge = CTVMerge.Factory.newInstance();
+	vmerge.setVal(STMerge.RESTART);
+	if (tableRow.getCell(i).getCTTc().getTcPr()==null) tableRow.getCell(i).getCTTc().addNewTcPr();
+	
+	tableRow.getCell(i).getCTTc().getTcPr().setVMerge(vmerge);
+	
+}
+private void setMergeContinue(int i, XWPFTableRow tableRow) {
+	CTVMerge vmerge = CTVMerge.Factory.newInstance();
+	vmerge.setVal(STMerge.CONTINUE);
+	if (tableRow.getCell(i).getCTTc().getTcPr()==null) tableRow.getCell(i).getCTTc().addNewTcPr();
+	
+	tableRow.getCell(i).getCTTc().getTcPr().setVMerge(vmerge);
+	
+}
+private XWPFTableRow setNewRow(XWPFTableRow tableRow) {
+	//XWPFTableRow row;
+
+	for(int i =0;i< 8; i++) {
+		
+	setBlankCell(i,tableRow);	
+	}
+	
+		return tableRow;
+}
+}
+
 
 

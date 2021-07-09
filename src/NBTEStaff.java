@@ -45,7 +45,7 @@ public class NBTEStaff  {
 			}
 	
 	public int getTransport() {
-		return 0;
+		return (int) (LocationUtils.distanceBetweenStates(ProgrammesCostEstimates.institutionLocation, "Kaduna")* 40/1000)*1000;
 	}
 	public int getHonorarium() {
 		if(this.isSeniorStaff) {

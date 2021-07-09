@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,7 +21,7 @@ public class ResourcePersonTypeDialog {
 
 	
 	
-	public ResourcePersonTypeDialog(ProgrammesCostEstimates main, ObservableList<Object> personnelList, String visit) {
+	public ResourcePersonTypeDialog(ProgrammesCostEstimates main, ObservableList<Object> personnelList, String visit,Button enableSubmitBtn, ObservableList<SimpleIntegerProperty> divisionSizes) {
 		
 		Stage subStage = new Stage();
 		
@@ -54,7 +55,8 @@ public class ResourcePersonTypeDialog {
 			 String rank = ranks.getValue();
 			 
 			
-			 new ResourcePersonDialog(main,(rank=="Proffessional Body")?true:false, personnelList, visit);
+			 new ResourcePersonDialog(main,(rank=="Proffessional Body")?true:false, personnelList, visit,enableSubmitBtn,divisionSizes);
+			
 			 subStage.close();
 		 });
 		 

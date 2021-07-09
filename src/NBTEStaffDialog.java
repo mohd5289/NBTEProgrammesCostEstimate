@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,7 +21,7 @@ import javafx.stage.Stage;
 
 public class NBTEStaffDialog {
 
-	public NBTEStaffDialog(ProgrammesCostEstimates main, ObservableList<Object> personnelList, String visit) {
+	public NBTEStaffDialog(ProgrammesCostEstimates main, ObservableList<Object> personnelList, String visit, Button enableSubmitBtn, ObservableList<SimpleIntegerProperty> divisionSizes) {
 		
 		// TODO Auto-generated constructor stub
 	
@@ -58,11 +59,18 @@ public class NBTEStaffDialog {
 		 Button btAddNBTEStaff = new Button("Add NBTE Staff");
 		
 		 btAddNBTEStaff.setOnAction((ActionEvent e) ->{
+				
 			 String officerName = nameOfOfficer.getText();
 			boolean isSeniorStaff = ranks.getValue()== "Senior Staff"?true:false;
 			 
 			personnelList.add(new NBTEStaff(officerName,isSeniorStaff,visit));
-			 subStage.close();
+			
+			 
+			if(ProgrammesCostEstimates.genCostEstimateBtnClicked==false) {
+				enableSubmitBtn.setVisible(true);
+	        	}
+					
+					 subStage.close();
 		 });
 		 
 			 pane.add(btAddNBTEStaff, 1, 2); 
@@ -117,6 +125,7 @@ String typeOfVisit = nbteStaff.getVisitationExercise();
 		 Button btAddNBTEStaff = new Button("Add NBTE Staff");
 		
 		 btAddNBTEStaff.setOnAction((ActionEvent e) ->{
+			
 			 personnelList.remove(index);
 			 String officerName = nameOfOfficer.getText();
 			boolean isSeniorStaff = ranks.getValue()== "Senior Staff"?true:false;

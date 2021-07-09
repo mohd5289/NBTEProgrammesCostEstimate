@@ -72,12 +72,11 @@ public class ResourcePerson  {
 	public boolean willTravelByFlight() {
 	return	LocationUtils.distanceBetweenStates(ProgrammesCostEstimates.institutionLocation, this.stateLocation) > 600;
 		}
-	public double getTransport() {
+	public int getTransport() {
 		if(willTravelByFlight()) {
 			return 130000;
-		}
-		
-		return LocationUtils.distanceBetweenStates(ProgrammesCostEstimates.institutionLocation, this.stateLocation)* 40;
+		}		
+		return (int) (LocationUtils.distanceBetweenStates(ProgrammesCostEstimates.institutionLocation, this.stateLocation)* 40/1000)*1000;
 	}
 	public int getHonorarium() {
 		if(this.isProffessionalBody) {

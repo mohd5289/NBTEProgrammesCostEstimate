@@ -1,3 +1,4 @@
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.HPos;
@@ -13,7 +14,7 @@ import javafx.stage.Stage;
 
 public class DriverDialog {
 
-	public DriverDialog(ProgrammesCostEstimates main, ObservableList<Object> personnelList) {
+	public DriverDialog(ProgrammesCostEstimates main, ObservableList<Object> personnelList, Button enableSubmitBtn, ObservableList<SimpleIntegerProperty> divisionSizes) {
 		// TODO Auto-generated constructor stub
 		Stage subStage = new Stage();
 		
@@ -36,9 +37,14 @@ public class DriverDialog {
 		 pane.add(fuelPriceText, 1, 1);
 		 Button btAddDriver = new Button("Add Driver");
 		 btAddDriver.setOnAction((ActionEvent e)->{
-			String amount = amountText.getText();
-			String fuelPrice = fuelPriceText.getText();
+			 
+			 String amount = amountText.getText();
+			 String fuelPrice = fuelPriceText.getText();
 			 personnelList.add(new Driver(amount, fuelPrice));
+		        	if(ProgrammesCostEstimates.genCostEstimateBtnClicked==false) {
+					enableSubmitBtn.setVisible(true);
+		        	}
+					
 			 subStage.close();
 		 });
 		 
@@ -54,7 +60,7 @@ public class DriverDialog {
 		 subStage.show();
 	}
 
-  public DriverDialog(ObservableList<Object> personnelList, int index,Driver driver) {
+  public DriverDialog( ObservableList<Object> personnelList,int index,Driver driver) {
 	  
 	  Stage subStage = new Stage();
 		
@@ -81,12 +87,13 @@ public class DriverDialog {
 			 pane.add(fuelPriceText, 1, 1);
 			 Button btAddDriver = new Button("Add Driver");
 			 btAddDriver.setOnAction((ActionEvent e)->{
-				personnelList.remove(index);
+				 personnelList.remove(driver);
 				 
 				 String amount = amountText.getText();
 				String fuelPrice = fuelPriceText.getText();
 				
 				personnelList.add(index,new Driver(amount, fuelPrice));
+				
 				 subStage.close();
 			 });
 			 
@@ -106,5 +113,10 @@ public class DriverDialog {
 	  
   }
 
+  public void counter(int count){
+	  
+	  
+		count++;
 
+	}
 }

@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,10 +21,10 @@ import javafx.stage.Stage;
 public class ResourcePersonDialog {
 
 	
-	public ResourcePersonDialog(ProgrammesCostEstimates main,boolean isProffessionalBody, ObservableList<Object> personnelList, String visit) {
+	public ResourcePersonDialog(ProgrammesCostEstimates main,boolean isProffessionalBody, ObservableList<Object> personnelList, String visit,Button enableSubmitBtn, ObservableList<SimpleIntegerProperty> divisionSizes) {
 		
 		//String typeOfVisit = visit.getValue();
-		
+		//int count =0;
 		Stage subStage = new Stage();
 		
 		 subStage.setTitle(isProffessionalBody?"Set Proffessional Body Resource Person":"Set Resource Person");
@@ -81,7 +82,13 @@ public class ResourcePersonDialog {
 			 
 			 
 			 personnelList.add(new ResourcePerson(nameOfResourcePerson, phoneNumber, address,state, nameOfProffessionalBody,isProffessionalBody, visit));
-			// main.isProffesionalBodyResourcePerson= false;
+			 if(ProgrammesCostEstimates.genCostEstimateBtnClicked==false) {
+					enableSubmitBtn.setVisible(true);
+		        	}
+			
+			
+			
+			 // main.isProffesionalBodyResourcePerson= false;
 			 subStage.close();
 		 });
 		 
@@ -160,7 +167,8 @@ String typeOfVisit = resourcePerson.getVisitationExercise();
 			String address = textForAddress.getText();
 			String nameOfProffessionalBody =  resourcePerson.isProffessionalBody()?proffessionalBodyNameText.getText():"";
 			String state = states.getValue();
-			 
+			//counter(count);
+			// System.out.println(count);
 			 
 			 personnelList.add(index,new ResourcePerson(nameOfResourcePerson, phoneNumber, address,state, nameOfProffessionalBody,resourcePerson.isProffessionalBody(), typeOfVisit));
 			// main.isProffesionalBodyResourcePerson= false;
@@ -179,7 +187,6 @@ String typeOfVisit = resourcePerson.getVisitationExercise();
 		
 	}
 	
-
 	
 
 	

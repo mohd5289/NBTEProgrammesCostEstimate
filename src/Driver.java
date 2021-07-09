@@ -20,6 +20,9 @@ public class Driver {
 	public void setFuel(String fuel) {
 		this.fuel = fuel;
 	}
+	public int getTotalEstimate(){
+		return  Integer.parseInt(getFuel())+Integer.parseInt(getAmount());
+		}
 	@Override
 	public String toString() {
 		return "Driver [amount= N" + amount + ", fuel= N" + fuel + "]";

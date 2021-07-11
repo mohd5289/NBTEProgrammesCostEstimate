@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -54,7 +55,7 @@ public class ProgrammesCostEstimates extends Application {
 	
 	//boolean isProffesionalBodyResourcePerson = true;
 	
-	 String divisionName;
+	 String divisionName="";
 	 
 	 XWPFDocument doc = new XWPFDocument();
 	 
@@ -69,8 +70,11 @@ public class ProgrammesCostEstimates extends Application {
 	 Button genCostEstimateBtn = new Button("Generate Cost Estimate");
 	 //public SimpleIntegerProperty grandTotalEstimateListener = new SimpleIntegerProperty();	
 	 public SimpleIntegerProperty binder = new SimpleIntegerProperty();
-	//public static boolean genCostEstimateEnabled = false;
-	
+	AggregatedObservableArrayList<Object> aggregatedWrapper = new AggregatedObservableArrayList<Object>();
+	 ObservableList<SimpleIntegerProperty> divisionSizes = FXCollections.observableArrayList();
+     ObservableList<ArrayList<String>>diplomasAndProgrammes= FXCollections.observableArrayList(); 
+     XWPFTableRow tableRowOne;
+     Desktop desktop = Desktop.getDesktop();
 	 
 	 public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -142,11 +146,13 @@ public class ProgrammesCostEstimates extends Application {
 			 Button addProgrammeButton = new  Button("Add Programme");
 		
 			// ObservableList<?> divisionPersonel = new ObservableList<?>() ;
-			 final AggregatedObservableArrayList<Object> aggregatedWrapper = new AggregatedObservableArrayList<>();
+				if(!addedDivisions.contains(divisionSelection.getValue())) {
+			      aggregatedWrapper = new AggregatedObservableArrayList<>();
 			  divisionAggregatedPersonnelList = aggregatedWrapper.getAggregatedList(); 
-		      
-		        ObservableList<SimpleIntegerProperty> divisionSizes = FXCollections.observableArrayList();
-		        ObservableList<ArrayList<String>>diplomasAndProgrammes= FXCollections.observableArrayList();
+			  divisionSizes = FXCollections.observableArrayList();
+			     diplomasAndProgrammes= FXCollections.observableArrayList(); 
+				}
+		       
 		        		//new ArrayList<ArrayList<String>>();
 			 HBox createProgramButtons = new HBox(3);	  
 			  ComboBox<String> diplomaSelection = new ComboBox<>();
@@ -181,7 +187,7 @@ public class ProgrammesCostEstimates extends Application {
 			  //createDivision();
 			newProgramme.getChildren().addAll(createProgramButtons);	  
 			 divisionName = divisionSelection.getValue(); 
-			
+			 divisionSelection.setDisable(true);
 			 HBox divisionLabelContainer = new HBox(230);
 			 BackgroundFill bf5 = new BackgroundFill(Color.WHITE, new CornerRadii(1), null);
 			 divisionLabelContainer.setBackground(new Background(bf5));
@@ -216,29 +222,30 @@ public class ProgrammesCostEstimates extends Application {
 						 XWPFTableRow headingRow = table.getRow(0);
 						// XWPFTableRow normalRow = table.getRow(0);
 						 addRemainingTableCells(headingRow,headers);
-						XWPFTableRow tableRowTwo=table.createRow();
 						
-						tableRowTwo.getCell(0).setText("col one, row two");
-					      tableRowTwo.getCell(1).setText("col two, row two");
-					      tableRowTwo.getCell(2).setText("col three, row two");
-					      tableRowTwo.getCell(3).setText("col one, row two");
-					      tableRowTwo.getCell(4).setText("col two, row two");
-					      tableRowTwo.getCell(5).setText("col three, row two");
-					      tableRowTwo.getCell(6).setText("col one, row two");
-					      tableRowTwo.getCell(7).setText("col two, row two");
-//					    
+            tableRowOne=		doc.getTableArray(0).createRow();
 					 	  
 					  waitingForCostEstimateFileToBeCreated= false;
 				 }	 
-			
+			 
+				
+				tableRowOne.getCell(0).setText("col one, row two");
+			      tableRowOne.getCell(1).setText("col two, row two");
+			      tableRowOne.getCell(2).setText("col three, row two");
+			      tableRowOne.getCell(3).setText("col one, row two");
+			      tableRowOne.getCell(4).setText("col two, row two");
+			      tableRowOne.getCell(5).setText("col three, row two");
+			      tableRowOne.getCell(6).setText("col one, row two");
+			      tableRowOne.getCell(7).setText("col two, row two");
 			 
 			 submitToDocBtn.setVisible(false);
+			 
 			 submitToDocBtn.setOnAction((ActionEvent f)->{
 					int divisionTotalEstimate = 0;
 				 XWPFTable table = doc.getTableArray(0);
 				 
 				
-				XWPFTableRow tableRowOne = table.getRow(1);
+				//XWPFTableRow tableRowOne = table.getRow(1);
 				
 				//new XWPFDocument()
 				
@@ -248,30 +255,37 @@ public class ProgrammesCostEstimates extends Application {
 					 
 					 if(i==0) {
 						
-						 if(firstDivisionClicked== false) {
+						 if(firstDivisionClicked) {
 							 setMergeContinue(0,tableRowOne);
 							setMergeContinue(1,tableRowOne); 		
+							 writeDivisionNameToCell(tableRowOne,divisionName);
 						 }else {
 						
 					setBlankCell(0,tableRowOne); 
 					setMergeRestart(0,tableRowOne);
 					setMergeRestart(1,tableRowOne);
 						 writeInstitutionNameToCell( tableRowOne, institutionField);
-						 writeDivisionNameToCell(tableRowOne,divisionSelection);
+						 writeDivisionNameToCell(tableRowOne,divisionName);
 					 }
 						 setMergeRestart(3,tableRowOne);
 					 }
 					 for (int j= 0;j < divisionSizes.get(i).getValue(); j++) {
 						 ArrayList<String> programmesSpecifications= diplomasAndProgrammes.get(i); 
-						 Object o = divisionAggregatedPersonnelList.get(k);
-						        					
-						 if(j==0) {
+						 Object o = divisionAggregatedPersonnelList.get(k);        					
+						 if(i==0 && j==0) {
 						 //  XWPFTableRow newTableRow=table.createRow();
 						   setBlankCell(2,tableRowOne);
 						   setMergeRestart(2,tableRowOne);
 						   writeProgrammeNameToCell(tableRowOne,programmesSpecifications.get(0),programmesSpecifications.get(1),programmesSpecifications.get(2));
 						   checkAndWritePersonnelToCells(o,tableRowOne, table,j,k,divisionTotalEstimate);
-						  }else {  
+						  }else if(i!=0 && j==0) {
+							 XWPFTableRow newTableRow = table.createRow();
+							 setNewRow(newTableRow);
+							   setMergeRestart(2,newTableRow);
+							   writeProgrammeNameToCell(newTableRow,programmesSpecifications.get(0),programmesSpecifications.get(1),programmesSpecifications.get(2));
+							   checkAndWritePersonnelToCells(o,newTableRow, table,j,k,divisionTotalEstimate);  
+						  }
+						   else {  
 							checkAndWritePersonnelToCells(o,setNewRow(table.createRow()), table,j,k,divisionTotalEstimate);  
 						  }
 						 k++;  
@@ -283,7 +297,9 @@ public class ProgrammesCostEstimates extends Application {
 				// grandTotalEstimate+=divisionTotalEstimate;
 				// System.out.print(divisionTotalEstimate);
 				// System.out.print(grandTotalEstimate);
-				 firstDivisionClicked= false;	 
+				 
+				 divisionSelection.setDisable(false);
+				 firstDivisionClicked= true;	 
 				 submitToDocBtn.setVisible(false);
 				 genCostEstimateBtn.setVisible(true);
 			 });
@@ -352,18 +368,22 @@ public class ProgrammesCostEstimates extends Application {
 		 
 		 System.out.println(grandTotalEstimate);
 		  
-		  
+		File costEstimateFile =   new File(costEstimatesFileName);
 		  FileOutputStream out;
 		  try {
-				out = new FileOutputStream(new File(costEstimatesFileName));	
+				out = new FileOutputStream(costEstimateFile);	
 				doc.write(out);
 				out.close();
 				System.out.print(costEstimatesFileName+" successfully created");
-			} catch (IOException e1) {
+				desktop.open(costEstimateFile);
+		  } catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}			
+		  genCostEstimateBtn.setVisible(false);
 		  genCostEstimateBtnClicked= true;	 
+	 
+	  
 	  }); 
 		 
 divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
@@ -400,7 +420,7 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 	    
 	    Scene scene = new Scene(scrollPane, 750, 650);
 		scene.getStylesheets().add("Viper.css");
-		 primaryStage.setTitle("Programmes Cost Estimate Generator"); // Set the stage title
+		 primaryStage.setTitle("Programmes Cost Estimate Generator (Beta Test Version)"); // Set the stage title
 		 primaryStage.setScene(scene); // Place the scene in the stage
 	  	
 		 primaryStage.show();
@@ -417,13 +437,13 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 
 
 
-	private void writeDivisionNameToCell(XWPFTableRow tableRowOne, ComboBox<String> divisionSelection) {
+	private void writeDivisionNameToCell(XWPFTableRow tableRowOne, String divisionSelection) {
 		// TODO Auto-generated method stub
     	// tableRowOne.getCell(3).addParagraph();
 		XWPFParagraph paragraph= new XWPFDocument().createParagraph();
     	 XWPFRun run = paragraph.createRun();
     	 run.setBold(true);
-    	 run.setText(divisionSelection.getValue());
+    	 run.setText(divisionSelection);
     	 tableRowOne.getCell(3).setParagraph(paragraph);
 	}
 
@@ -446,37 +466,6 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 	          visitRun.setText("("+visit+")");
 	          tableRowOne.getCell(2).setParagraph(paragraph);
      }
-
-
-
-	private void  writeRemainingTableHeaders(XWPFTableRow tableRow, ArrayList<String> headers){
-    	 
-    	 for(int i =0;i< headers.size();i++) {
-    		 
-    		 tableRow.getCell(i+1).setText(headers.get(i));
-    		// tableRow.addNewTableCell().setText(headers.get(i));
-    		// tableRow.getCell(i+1).getParagraphs().get(0).getRuns().get(0).setBold(true);
-    	 }
-    	 
-     }
-
-	private void createTableHeaders(XWPFTable table) {
-		// TODO Auto-generated method stub
-		 XWPFTableRow tableRowOne = table.getRow(0);
-		 //tableRowOne.addNewTableCell().setText();
-		
-		  
-		 
-		  
-  
-		  
- // writeRemainingTableHeaders(tableRowOne,headers);
-	
-	
-	
-	}
-
-
 
 	@SuppressWarnings("rawtypes")
 	private void handleButtonClick(Button addProgrammeButton, VBox newDivision, ComboBox<String> visitationType, ObservableList<SimpleIntegerProperty> divisionSizes, AggregatedObservableArrayList<Object> aggregatedWrapper, ComboBox<String> diplomaSelection, TextField programmeName,
@@ -509,13 +498,7 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 				personnel.setMinHeight(320);
 				aggregatedWrapper.appendList(personnelList);
 				
-				//SimpleIntegerProperty listSizeBinder= new SimpleIntegerProperty(1);
 				
-			
-			
-			//int  index= divisionSizes.indexOf(listSize);
-			//System.out.print(divisionSizes.get(0));
-			
 				  
 				  
 				  personnelList.addListener(new ListChangeListener() {
@@ -868,23 +851,7 @@ private void checkAndWritePersonnelToCells(Object o,XWPFTableRow tableRow, XWPFT
 
 }	
 
-private void setNormalTextInCells(XWPFTableRow tableRow ) {
-	for(int i =0 ;i< 8 ;i++) {
-		tableRow.getCell(i).getParagraphs().get(0).getRuns().get(0).setBold(false);
-	//	XWPFRun run =tableRow.getCell(i).getParagraphs().get(0).getRuns().get(0);
-		XWPFDocument d = new XWPFDocument();
-		XWPFParagraph p = d.createParagraph();
-		XWPFRun run1=	p.createRun();
-		XWPFRun run2=	p.createRun();
-		run1.setText("c");
-		run1.addBreak();
-		
-		run1.setText("a");
-		
-		
-	}
-	
-}
+
 
 private void addRemainingTableCells(XWPFTableRow tableRow,ArrayList<String>headers) {
 	

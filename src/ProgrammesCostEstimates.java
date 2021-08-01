@@ -562,7 +562,6 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 				 }
 				 else if(o instanceof ProffessionalBodyResourcePerson) {
 					 ProffessionalBodyResourcePerson  proffessionalBodyResourcePerson = ( ProffessionalBodyResourcePerson)o;
-					 
 					 new ProffessionalBodyResourcePersonDialog(personnelList,selectedIndex,proffessionalBodyResourcePerson);
 				 }
 				 else if(o instanceof NBTEStaff) {
@@ -679,10 +678,6 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 		XWPFRun runFuelAmount = paragraphFuelAmount.createRun();
 		runFuelAmount.setText(driver.getFuel());
 		tableRow1.getCell(7).setParagraph(paragraphFuelAmount);
-	
-	
-	
-	
 	
 	}
 	

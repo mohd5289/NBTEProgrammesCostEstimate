@@ -42,9 +42,9 @@ public class NBTEStaffDialog {
 		 ComboBox<String> ranks = new ComboBox<>();
 		
 		 ranks.setPrefWidth(200);
-		 ranks.setValue("Senior Staff");
+		 ranks.setValue("Chief and Above");
 		  ObservableList<String> items =FXCollections.observableArrayList(new ArrayList<String>(
-		            Arrays.asList("Senior Staff","Junior Staff")));
+		            Arrays.asList("Chief and Above","Asst Chief and Below")));
 		  ranks.getItems().addAll(items);
 		 // Place nodes in the pane
 		  
@@ -61,7 +61,7 @@ public class NBTEStaffDialog {
 		 btAddNBTEStaff.setOnAction((ActionEvent e) ->{
 				
 			 String officerName = nameOfOfficer.getText();
-			boolean isSeniorStaff = ranks.getValue()== "Senior Staff"?true:false;
+			boolean isSeniorStaff = ranks.getValue()== "Chief and Above"?true:false;
 			 
 			personnelList.add(new NBTEStaff(officerName,isSeniorStaff,visit));
 			
@@ -108,9 +108,9 @@ String typeOfVisit = nbteStaff.getVisitationExercise();
 		 ComboBox<String> ranks = new ComboBox<>();
 		
 		 ranks.setPrefWidth(200);
-		 ranks.setValue(nbteStaff.isSeniorStaff()?"Senior Staff":"Junior Staff");
+		 ranks.setValue(nbteStaff.isSeniorStaff()?"Chief and Above":"Asst Chief and Below");
 		  ObservableList<String> items =FXCollections.observableArrayList(new ArrayList<String>(
-		            Arrays.asList("Senior Staff","Junior Staff")));
+		            Arrays.asList("Chief and Above","Asst Chief and Below")));
 		  ranks.getItems().addAll(items);
 		 // Place nodes in the pane
 		  
@@ -128,7 +128,7 @@ String typeOfVisit = nbteStaff.getVisitationExercise();
 			
 			 personnelList.remove(index);
 			 String officerName = nameOfOfficer.getText();
-			boolean isSeniorStaff = ranks.getValue()== "Senior Staff"?true:false;
+			boolean isSeniorStaff = ranks.getValue()== "Chief and Above"?true:false;
 			 
 			personnelList.add(index,new NBTEStaff(officerName,isSeniorStaff,typeOfVisit));
 			 subStage.close();

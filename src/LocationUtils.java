@@ -16,6 +16,7 @@ public class LocationUtils {
 		statesWithLatLng.put("Adamawa", new ArrayList<Double> (Arrays.asList(10.270, 13.270)));
 		statesWithLatLng.put("Akwa Ibom", new ArrayList<Double> (Arrays.asList(5.007, 7.850)));
 		statesWithLatLng.put("Anambra", new ArrayList<Double> ( Arrays.asList(6.210, 7.070)));
+		statesWithLatLng.put("Bayelsa", new ArrayList<Double> ( Arrays.asList(6.26, 4.92)));
 		statesWithLatLng.put("Bauchi",new ArrayList<Double> ( Arrays.asList(11.680, 10.190)));
 		statesWithLatLng.put("Benue", new ArrayList<Double> (Arrays.asList(7.190, 8.130)));
 		statesWithLatLng.put("Borno", new ArrayList<Double> ( Arrays.asList(10.620, 12.190)));

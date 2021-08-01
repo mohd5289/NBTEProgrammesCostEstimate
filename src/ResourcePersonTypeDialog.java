@@ -54,8 +54,12 @@ public class ResourcePersonTypeDialog {
 		 btOk.setOnAction((ActionEvent e) ->{
 			 String rank = ranks.getValue();
 			 
-			
-			 new ResourcePersonDialog(main,(rank=="Proffessional Body")?true:false, personnelList, visit,enableSubmitBtn,divisionSizes);
+			 if (rank == "Proffessional Body") {
+		          new ProffessionalBodyResourcePersonDialog(main, personnelList, visit,enableSubmitBtn,divisionSizes);
+	          } else {
+	        	  new ResourcePersonDialog(main,false, personnelList, visit,enableSubmitBtn,divisionSizes);
+	          }
+			// new ResourcePersonDialog(main,(rank=="Proffessional Body")?true:false, personnelList, visit,enableSubmitBtn,divisionSizes);
 			
 			 subStage.close();
 		 });

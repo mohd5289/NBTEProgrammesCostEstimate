@@ -560,6 +560,11 @@ divisionSelectionPanel.getChildren().addAll(new Label("Select Division: "),
 					 ResourcePerson resourcePerson = (ResourcePerson)o;
 					 new ResourcePersonDialog(personnelList,selectedIndex,resourcePerson);
 				 }
+				 else if(o instanceof ProffessionalBodyResourcePerson) {
+					 ProffessionalBodyResourcePerson  proffessionalBodyResourcePerson = ( ProffessionalBodyResourcePerson)o;
+					 
+					 new ProffessionalBodyResourcePersonDialog(personnelList,selectedIndex,proffessionalBodyResourcePerson);
+				 }
 				 else if(o instanceof NBTEStaff) {
 					 NBTEStaff nbteStaff = (NBTEStaff)o;
 					 
@@ -814,18 +819,41 @@ private void writeInstitutionNameToCell(XWPFTableRow tableRow, TextField institu
 				  run.setText("State");
 				  tableRow.getCell(1).setParagraph(paragraph);
 }
-
+private void writeProffessionalBodyResourcePersonToCell(XWPFTableRow tableRow, ProffessionalBodyResourcePerson proffessionalBodyResourcePerson, int j, int k) {
+    mergeEmptyCells(tableRow, j, k, (new XWPFDocument()).createParagraph());
+    XWPFParagraph paragraph = (new XWPFDocument()).createParagraph();
+    XWPFRun run = paragraph.createRun();
+    run.setText(proffessionalBodyResourcePerson.getProffessionalBodyName());
+    run.addBreak();
+    run.setText(proffessionalBodyResourcePerson.getAddress());
+    run.addBreak();
+    run.setText(proffessionalBodyResourcePerson.getPhoneNumber());
+    tableRow.getCell(4).setParagraph(paragraph);
+    XWPFParagraph paragraphTransport = (new XWPFDocument()).createParagraph();
+    XWPFRun transportRun = paragraphTransport.createRun();
+    transportRun.setText(String.valueOf(proffessionalBodyResourcePerson.getTransport()));
+    tableRow.getCell(5).setParagraph(paragraphTransport);
+    XWPFParagraph paragraphHonoriarum = (new XWPFDocument()).createParagraph();
+    XWPFRun honoriarumRun = paragraphHonoriarum.createRun();
+    honoriarumRun.setText(String.valueOf(proffessionalBodyResourcePerson.getHonorarium()));
+    tableRow.getCell(6).setParagraph(paragraphHonoriarum);
+    XWPFParagraph paragraphTotalEstimate = (new XWPFDocument()).createParagraph();
+    XWPFRun totalEstimateRun = paragraphTotalEstimate.createRun();
+    totalEstimateRun.setText(String.valueOf(proffessionalBodyResourcePerson.getTotalEstimate()));
+    tableRow.getCell(7).setParagraph(paragraphTotalEstimate);
+  }
 
 private void checkAndWritePersonnelToCells(Object o,XWPFTableRow tableRow, XWPFTable table, int j,int k, int divisionTotalEstimate) {
 	if(o instanceof ResourcePerson) {						   
 		   ResourcePerson resourcePerson= (ResourcePerson)o;
 		   divisionTotalEstimate+= resourcePerson.getTotalEstimate();
 		   System.out.print(divisionTotalEstimate);
-		   if(resourcePerson.isProffessionalBody()) {
-		   writeProffessionalBodyResourcePersonToCell(tableRow, resourcePerson,j,k);}
-        else {writeResourcePersonNameToCell(tableRow, resourcePerson,j,k);
-              }    
-	         }
+	}
+		   else if (o instanceof ProffessionalBodyResourcePerson) {
+			   ProffessionalBodyResourcePerson proffessionalBodyResourcePerson = (ProffessionalBodyResourcePerson)o;
+			   divisionTotalEstimate+= proffessionalBodyResourcePerson.getTotalEstimate();
+			      writeProffessionalBodyResourcePersonToCell(tableRow, proffessionalBodyResourcePerson, j, k);
+			    }
 		else if(o instanceof NBTEStaff) {
 			 NBTEStaff nbteStaff = (NBTEStaff)o;
 			writeNBTEStaffToCell(tableRow, nbteStaff,j,k);
